@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Creates CloudWatch alarms for LagDuration metrics for provided SourceServerIDs.
+
+Parameters:
+  SubscriptionEmail:
+    Type: String
+    Description: Single email address to subscribe to the SNS topic.
+  
+  SourceServerIDs:
+    Type: CommaDelimitedList
+    Description: Comma-separated list of SourceServerIDs to monitor for LagDuration.
+
+Resources:
+  ElectromechDRSNS:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: electromechDRDatareplicationstatus
+
+  # Create SNS subscription for a single email
+  ElectromechDRSNSSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: email
+      Endpoint: !Ref SubscriptionEmail
+      TopicArn: !Ref ElectromechDRSNS
+
+  # CloudWatch alarms for each SourceServerID
+  Alarm1:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Join ["", ["LagDuration-", !Select [0, !Ref SourceServerIDs]]]
+      AlarmDescription: !Join ["", ["Alarm for LagDuration >= 3600 for SourceServerID ", !Select [0, !Ref SourceServerIDs], "."]]
+      Namespace: AWS/DRS
+      MetricName: LagDuration
+      Dimensions:
+        - Name: SourceServerID
+          Value: !Select [0, !Ref SourceServerIDs]
+      Statistic: Minimum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 3600
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      AlarmActions:
+        - !Ref ElectromechDRSNS
+      TreatMissingData: missing
+
+  Alarm2:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Join ["", ["LagDuration-", !Select [1, !Ref SourceServerIDs]]]
+      AlarmDescription: !Join ["", ["Alarm for LagDuration >= 3600 for SourceServerID ", !Select [1, !Ref SourceServerIDs], "."]]
+      Namespace: AWS/DRS
+      MetricName: LagDuration
+      Dimensions:
+        - Name: SourceServerID
+          Value: !Select [1, !Ref SourceServerIDs]
+      Statistic: Minimum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 3600
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      AlarmActions:
+        - !Ref ElectromechDRSNS
+      TreatMissingData: missing

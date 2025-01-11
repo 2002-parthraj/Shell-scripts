@@ -1,0 +1,24 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Nested template to create CloudWatch alarms for each SourceServerID.
+
+Parameters:
+  SourceServerIDs:
+    Type: CommaDelimitedList
+    Description: List of SourceServerIDs to monitor.
+
+  SNSArn:
+    Type: String
+    Description: The ARN of the SNS topic for alarm notifications.
+
+Resources:
+  # Create alarms for each SourceServerID
+  LagDurationAlarms:
+    Type: AWS::CloudFormation::Macro
+    Properties:
+      Definition:
+        Fn::Transform:
+          Name: AWS::Serverless-2016-10-31
+      Type: AWS::CloudFormation::Stack
+      Properties:
+  {More template edits needed when generated elements}
+---
