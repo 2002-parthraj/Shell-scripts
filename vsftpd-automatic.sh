@@ -33,7 +33,7 @@ if id "$username" &>/dev/null; then
     echo "User $username already exists. Proceeding..."
 else
     echo "User $username does not exist. Creating..."
-    sudo useradd -m -d /home/$username $username
+    sudo useradd -m -d /home/$username -s /bin/bash $username
     echo "Set password for the new user $username:"
     sudo passwd $username
 fi
@@ -91,6 +91,10 @@ else
     # Step 7: Create /etc/vsftpd.userlist
     echo "Adding user $username to /etc/vsftpd.userlist..."
     sudo bash -c "echo $username >> /etc/vsftpd.userlist"
+
+    # Ensure correct permissions for security
+    sudo chmod 600 /etc/vsftpd.userlist
+    sudo chmod 600 /etc/vsftpd.chroot_list
 
     # Step 8: Update vsftpd.conf
     echo "Updating vsftpd configuration..."
